@@ -25,9 +25,24 @@ pub fn get_text_folder() -> PathBuf
 /// detection program
 pub fn get_cluster_program_location() -> PathBuf
 {
+    // Assuming that when running from project source, computer could be running Linux or Windows.
+    // If running a release build, then it will have been packaged specifically for Linux or Windows,
+    // hence why if no DevelopmentFlag is set, the same location is returned
+
     if env::var("DevelopmentFlag").is_ok()
     {
-        get_root_project_folder().join("ClusterDetectionExe/ReleaseBuild/ClusterDetectionExe")
+        if cfg!(windows)
+        {
+            get_root_project_folder().join("ClusterDetectionExe/ReleaseBuildWindows/ClusterDetectionExe")
+        }
+        else if cfg!(unix)
+        {
+            get_root_project_folder().join("ClusterDetectionExe/ReleaseBuildLinux/ClusterDetectionExe")
+        }
+        else
+        {
+            panic!("Unsupported operating system- only Windows and Linux are supported")
+        }
     }
     else
     {

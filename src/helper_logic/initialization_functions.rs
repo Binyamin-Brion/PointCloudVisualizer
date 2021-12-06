@@ -224,7 +224,7 @@ impl PointCloudData
     {
         let cluster_information = ClusterInformation
         {
-            output_file: "C:\\Users\\BinyBrion\\CLionProjects\\PointCloudVisualizer\\ClusterDetectionExe\\ReleaseBuild\\result.txt".to_string(),
+            output_file: "clusterDetectionResult.txt".to_string(),
             epsilon: 0.05,
             min_num_points: 20
         };
