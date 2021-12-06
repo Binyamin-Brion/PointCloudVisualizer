@@ -1,0 +1,36 @@
+name: PointCloudVisualizer
+version: "0.1"
+about: Renders a model of a set of pointd representing a point cloud in 3D
+args:
+
+  - render_initial_point_cloud:
+        short: i
+        long: render_init_point_cloud
+        value_name: FILE
+        help: Specifies location of file containing initial point cloud data
+        takes_value: true
+        multiple: true # Not sure why this has to be true for clap to successfully parse...
+
+  - mutex_files:
+      short: m
+      long: mutex_files
+      value_name: FILE
+      help: Specifies the location of files used for locking during the IPC process
+      takes_value: true
+      multiple: true
+
+  - data_files:
+        short: d
+        long: data_files
+        value_name: FILE
+        help: Specifies location of files used for updating point cloud data
+        takes_value: true
+        multiple: true
+
+  - sleep_duration:
+      short: s
+      long: sleep_duration
+      value_name: NUMBER
+      help: Specifies how often to check IPC mutex file to indicate data file is ready to be read
+      takes_value: true
+      multiple: false

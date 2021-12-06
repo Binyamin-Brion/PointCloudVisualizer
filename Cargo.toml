@@ -1,0 +1,22 @@
+[package]
+name = "point_cloud_visualizer"
+version = "1.0.0"
+edition = "2018"
+build = "build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = {version = "2.33", features = ["yaml"]}
+gl = "0.14.0"
+nalgebra-glm = "0.15.0"
+tobj = "3.2.0"
+fnv = "1.0.7"
+threadpool = "1.8.1"
+lazy_static = "1.4.0"
+stb_image = "0.2.3"
+angel_font_file_parser = { path = "../AngelFontFileParser" }
+
+[dependencies.glfw]
+git = "https://github.com/bjz/glfw-rs.git"
+default-features = false
