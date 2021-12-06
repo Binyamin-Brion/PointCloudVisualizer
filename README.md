@@ -22,7 +22,7 @@ If this is done for every point, then a visual representation of the cloud can b
 
 ## Sample Release
 
-A static point cloud is provided in the Release section of the repository. This demo was compiled for Windows.
+A static point cloud is provided in the Release section of the repository. This demo was compiled for Linux and Windows.
 
 ## Requirements
 
