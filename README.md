@@ -27,7 +27,7 @@ A static point cloud is provided in the Release section of the repository. This 
 ## Requirements
 
 * System must support OpenGL 4.5
-* Operating System: Windows
+* Operating System: Windows, Linux (tested on Linux Mint. Requires GLFW3 library to be installed)
 
 ## User Guide
 A user guide in both PDF and docx form is provided in the 'User Guide' folder, which is itself located in the docs folder.
