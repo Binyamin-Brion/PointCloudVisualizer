@@ -105,7 +105,7 @@ fn render_scene(shader_program: &ShaderProgram, draw_call_info: &DrawCallInfo, o
             gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
             gl::ClearColor(0.15, 0.15, 0.15, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT | gl::STENCIL_BUFFER_BIT);
-            gl::Viewport(0, ((outside_param.window_resolution.1 as f32 * 0.2)) as i32, reset_viewport_x, reset_viewport_y);
+            gl::Viewport(0, ((outside_param.window_resolution.1 as f32 * 0.25)) as i32, reset_viewport_x, reset_viewport_y);
             gl::DrawElementsInstancedBaseVertexBaseInstance(gl::TRIANGLES, draw_call_info.indice_count, gl::UNSIGNED_INT, draw_call_info.indice_offset, draw_call_info.instance_count, draw_call_info.vertex_offset, draw_call_info.instance_offset);
         }
 

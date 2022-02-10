@@ -43,6 +43,8 @@ fn main()
 
         reflect_point_cloud(&mut program_variables.render_data);
 
+        add_lidar_pos(&mut program_variables.render_data);
+
         // ********** Update Clusters on Static Point Cloud **********
 
         if !program_variables.point_cloud_update.cluster_for_most_recent && program_variables.point_cloud_data.pause_updating
@@ -73,11 +75,13 @@ fn main()
                 buffer_group: &mut program_variables.render_data.buffer_groups,
                 point_model_id: program_variables.render_data.cube_model_id,
                 cluster_information: &program_variables.point_cloud_data.cluster_information,
+                display_lidar_pos: program_variables.args.display_lidar_pos
             };
 
             let ipc_update_args = HandleIPCUpdate
             {
                 ipc_args: ipc_processing_arg,
+                lidar_pos: &mut program_variables.point_cloud_data.position,
                 num_cloud_points: &mut program_variables.point_cloud_data.num_points_cloud,
                 time_since_update: &mut program_variables.point_cloud_data.time_since_update,
                 cluster_result_text: &mut program_variables.point_cloud_data.cluster_result_text,
@@ -85,7 +89,7 @@ fn main()
             };
 
             update_point_cloud(ipc_update_args);
-            program_variables.centre_views();
+            program_variables.centre_views(program_variables.args.display_lidar_pos);
         }
         else if program_variables.args.using_file_ipc() && program_variables.point_cloud_data.pause_updating
         {
@@ -129,7 +133,9 @@ fn main()
             num_points: program_variables.point_cloud_data.num_points_cloud,
             cluster_result_text: &program_variables.point_cloud_data.cluster_result_text,
             epsilon: program_variables.point_cloud_data.cluster_information.epsilon,
-            min_num_points: program_variables.point_cloud_data.cluster_information.min_num_points
+            min_num_points: program_variables.point_cloud_data.cluster_information.min_num_points,
+            lidar_pos: program_variables.point_cloud_data.position,
+            add_lidar_pos: program_variables.render_data.add_lidar_pos
         };
         write_scene_info(text_param);
 

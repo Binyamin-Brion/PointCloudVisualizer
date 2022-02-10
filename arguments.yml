@@ -34,3 +34,12 @@ args:
       help: Specifies how often to check IPC mutex file to indicate data file is ready to be read
       takes_value: true
       multiple: false
+
+# Not sure why this argument requires a value. Saying a value is optional causes clap to panic
+  - display_lidar_pos:
+      short: p
+      long: lidar_pos
+      value_name: NUMBER
+      help: Specifies if first point in data file is displayed as the lidar position
+      takes_value: true
+      multiple: false

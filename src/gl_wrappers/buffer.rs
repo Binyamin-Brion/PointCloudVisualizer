@@ -85,7 +85,7 @@ impl Buffer
     /// `vao' - the vao that the buffer is a part of
     /// `timeout` - the amount of time in nanoseconds to wait for the buffer to become free
     /// 'offset_bytes' - the offset into the buffer to write data to
-    pub fn write_data_offset<T: Debug>(&mut self, data: &Vec<T>, vao: &VAO, timeout: u64, offset_bytes: isize)
+    pub fn write_data_offset<T: Debug>(&mut self, data: &[T], vao: &VAO, timeout: u64, offset_bytes: isize)
     {
         let number_elements_offset = (offset_bytes as usize / size_of::<T>()) as isize;
 

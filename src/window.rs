@@ -12,6 +12,7 @@ pub struct RenderWindow
     events: Receiver<(f64, WindowEvent)>,
     key_input: Vec<(Key, Action)>,
     cursor_pos_history: Vec<(i32, i32)>,
+    scroll_history: Vec<f32>,
     cursor_button_history: Vec<(MouseButton, Action)>,
     latest_cursor_pos: (i32, i32),
 }
@@ -70,6 +71,7 @@ impl RenderWindow
         window.set_key_polling(true);
         window.set_cursor_pos_polling(true);
         window.set_mouse_button_polling(true);
+        window.set_scroll_polling(true);
         window.set_size_polling(true);
         window.make_current();
         gl::load_with(|s| window.get_proc_address(s) as *const _);
@@ -84,7 +86,11 @@ impl RenderWindow
             RenderWindow::setup_debug_context();
         }
 
-        RenderWindow{ glfw, window, events, key_input: Vec::new(), cursor_pos_history: Vec::new(), cursor_button_history: Vec::new(), latest_cursor_pos: (0, 0) }
+        RenderWindow
+        {
+            glfw, window, events, key_input: Vec::new(), cursor_pos_history: Vec::new(),
+            cursor_button_history: Vec::new(), latest_cursor_pos: (0, 0), scroll_history: Vec::new()
+        }
     }
 
     /// Query if the window should be closed
@@ -117,9 +123,16 @@ impl RenderWindow
         &self.cursor_button_history
     }
 
+    /// Get the dimension of the window at the time of calling
     pub fn get_window_dimensions(&self) -> (i32, i32)
     {
         self.window.get_size()
+    }
+
+    /// Get all of the history of scrolling for the current frame
+    pub fn get_scroll_history(&self) -> &Vec<f32>
+    {
+        &self.scroll_history
     }
 
     /// Tell the window that it should close
@@ -128,6 +141,7 @@ impl RenderWindow
         self.window.set_should_close(close);
     }
 
+    /// Get the latest cursor position
     pub fn get_latest_cursor_pos(&self) -> (i32, i32)
     {
         self.latest_cursor_pos
@@ -139,6 +153,7 @@ impl RenderWindow
         self.glfw.poll_events();
         self.key_input.clear();
         self.cursor_pos_history.clear();
+        self.scroll_history.clear();
         self.cursor_button_history.clear();
 
         for (_, event) in glfw::flush_messages(&self.events)
@@ -162,6 +177,10 @@ impl RenderWindow
                         self.cursor_pos_history.push((x as i32, y as i32));
                         self.latest_cursor_pos = (x as i32, y as i32);
                     },
+                glfw::WindowEvent::Scroll(_, y) =>
+                    {
+                        self.scroll_history.push(y as f32);
+                    }
                 glfw::WindowEvent::MouseButton(button, action, _) =>
                     {
                         self.cursor_button_history.push((button, action))

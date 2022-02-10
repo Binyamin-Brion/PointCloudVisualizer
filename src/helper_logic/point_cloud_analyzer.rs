@@ -8,6 +8,7 @@ use crate::ipc_logic::ipc_receiver::IPCContributor;
 /// (when a static point cloud is being rendered) and to centre the cameras (both scene and views)
 pub struct InitialCloudAnalyzer
 {
+    initial_pos: Option<TVec3<f32>>,
     default_points: Vec<TVec3<f32>>,
     centre: TVec3<f32>,
     max_length: f32,
@@ -19,7 +20,7 @@ impl InitialCloudAnalyzer
     /// then an empty point cloud is assumed
     ///
     /// `initial_point_position` - file specifying the points of a point cloud
-    pub fn new(initial_point_positions: &Option<String>) -> InitialCloudAnalyzer
+    pub fn new(initial_point_positions: &Option<String>, displaying_lidar_pos: bool) -> InitialCloudAnalyzer
     {
         match initial_point_positions
         {
@@ -53,7 +54,16 @@ impl InitialCloudAnalyzer
                     let mut min_y = f32::MAX;
                     let mut max_y = f32::MIN;
 
-                    for point in &initial_points
+                    let starting_index = if displaying_lidar_pos
+                    {
+                        1
+                    }
+                    else
+                    {
+                        0
+                    };
+
+                    for point in &initial_points[starting_index..]
                     {
                         min_x = min_x.min(point.x);
                         max_x = max_x.max(point.x);
@@ -70,9 +80,18 @@ impl InitialCloudAnalyzer
                                          .max((max_y - min_y).abs())
                                          .max((max_z - min_z).abs());
 
-                    InitialCloudAnalyzer { default_points: initial_points, centre, max_length }
+                    let initial_pos = if displaying_lidar_pos
+                    {
+                        Some(initial_points[0])
+                    }
+                    else
+                    {
+                        None
+                    };
+
+                    InitialCloudAnalyzer { default_points: initial_points, centre, max_length, initial_pos }
                 },
-            None => InitialCloudAnalyzer { default_points: vec![], centre: vec3(0.0, 0.0, 0.0), max_length: 0.0 }
+            None => InitialCloudAnalyzer { default_points: vec![], centre: vec3(0.0, 0.0, 0.0), max_length: 0.0, initial_pos: None }
         }
     }
 
@@ -92,5 +111,11 @@ impl InitialCloudAnalyzer
     pub fn get_max_length(&self) -> f32
     {
         self.max_length
+    }
+
+    /// Get the initial position of the lidar, if any
+    pub fn get_initial_lidar_pos(&self) -> Option<TVec3<f32>>
+    {
+        self.initial_pos
     }
 }

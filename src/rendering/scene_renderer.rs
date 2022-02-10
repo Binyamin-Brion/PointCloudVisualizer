@@ -54,7 +54,7 @@ pub struct SceneRenderer
 pub struct UploadInformation<'a>
 {
     pub model_id: ModelId,
-    pub instance_translations: Option<&'a Vec<TVec3<f32>>>,
+    pub instance_translations: Option<&'a [TVec3<f32>]>,
     pub instance_colours: Option<&'a Vec<TVec3<f32>>>,
 }
 
@@ -348,7 +348,7 @@ impl SceneRenderer
 
         unsafe
             {
-                gl::Viewport(0, (outside_param.window_resolution.1 as f32 * 0.2) as i32, reset_viewport_x, reset_viewport_y);
+                gl::Viewport(0, (outside_param.window_resolution.1 as f32 * 0.25) as i32, reset_viewport_x, reset_viewport_y);
 
                 let mut instance_offset: u32 = self.base_number_instances;
                 gl::DrawArraysInstancedBaseInstance(gl::LINES, 2, 2, self.grid.get_num_instances(), instance_offset);

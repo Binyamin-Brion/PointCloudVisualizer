@@ -34,6 +34,7 @@ pub struct IPCProcessingArgs<'a>
     pub buffer_group: &'a mut SceneRenderer,
     pub point_model_id: ModelId,
     pub cluster_information: &'a ClusterInformation,
+    pub display_lidar_pos: bool,
 }
 
 /// Holds information about the result of updating the point cloud
@@ -41,6 +42,7 @@ pub struct UploadResult
 {
     pub updated_lidar_file: Option<String>,
     pub num_points: Option<usize>,
+    pub lidar_pos: Option<TVec3<f32>>,
     pub cluster_error_message: String
 }
 
@@ -65,18 +67,31 @@ pub fn process_ipc_content(ipc_args: IPCProcessingArgs) -> IPCUpdateResult
                 {
                     Ok(i) =>
                         {
-                            let num_instances = i.points.len();
+                            // If lidar pos is in the content file, the first data point is the lidar
+                            // position. Thus the number of point cloud points instances is one less
+                            //  than the number of points in the data file
+                            let (num_instances, lidar_pos) = if ipc_args.display_lidar_pos
+                            {
+                                (i.points.len() - 1, Some(i.points[0]))
+                            }
+                            else
+                            {
+                                (i.points.len(), None)
+                            };
+
+                            let starting_index = i.points.len() - num_instances;
 
                             ipc_args.buffer_group.upload_instance_information(vec![UploadInformation
                             {
                                 model_id: ipc_args.point_model_id,
                                 instance_colours: Some(&vec![default_point_colour(); num_instances]),
-                                instance_translations: Some(&i.points),
+                                instance_translations: Some(&i.points[starting_index..]),
                             }]);
 
                             return IPCUpdateResult::Success(UploadResult
                             {
                                 updated_lidar_file: Some(i.file_name),
+                                lidar_pos,
                                 num_points: Some(num_instances),
                                 cluster_error_message: "Cluster program status: No Error".to_string()
                             });

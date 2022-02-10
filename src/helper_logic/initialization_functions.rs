@@ -31,6 +31,7 @@ pub struct ProgramVariables
 /// regarding the point cloud
 pub struct PointCloudData
 {
+    pub position: Option<TVec3<f32>>,
     pub time_since_update: Instant,
     pub pause_updating: bool,
     pub cluster_result_text: String,
@@ -62,6 +63,7 @@ pub struct RenderData
     pub view_fbos: ViewFBO,
     pub text_renderer: TextRendering,
     pub cloud_translation: TVec3<f32>,
+    pub add_lidar_pos: bool,
     reflect_vertically: i32,
 }
 
@@ -72,7 +74,7 @@ impl ProgramVariables
     pub fn new() -> ProgramVariables
     {
         let args = args_parser::Args::parse_args();
-        let point_analyzer = InitialCloudAnalyzer::new(&args.initial_data_model);
+        let point_analyzer = InitialCloudAnalyzer::new(&args.initial_data_model, args.display_lidar_pos);
 
         let mut program_variables = ProgramVariables
         {
@@ -90,18 +92,18 @@ impl ProgramVariables
         // are going to be updated
         if !program_variables.args.using_file_ipc()
         {
-            program_variables.centre_views();
+            program_variables.centre_views(program_variables.args.display_lidar_pos);
         }
 
         program_variables
     }
 
     /// Centres the camera views based off of the location of the point cloud
-    pub fn centre_views(&mut self)
+    pub fn centre_views(&mut self, displaying_lidar_pos: bool)
     {
         if !self.have_centred_views
         {
-            self.point_analyzer = InitialCloudAnalyzer::new(&Some(self.point_cloud_update.current_content_file.clone()));
+            self.point_analyzer = InitialCloudAnalyzer::new(&Some(self.point_cloud_update.current_content_file.clone()), displaying_lidar_pos);
 
             let mut right_pos = self.point_analyzer.get_centre();
             right_pos -= self.render_data.view_fbos.get_right_fbo().get_camera().get_direction() * self.point_analyzer.get_max_length();
@@ -151,7 +153,8 @@ impl RenderData
             translation_matrix: setup_translation_matrix(),
             view_selection: ViewSelection::new(),
             cloud_translation: vec3(0.0, 0.0, 0.0),
-            reflect_vertically: 1
+            reflect_vertically: 1,
+            add_lidar_pos: false
         }
     }
 
@@ -235,7 +238,8 @@ impl PointCloudData
             pause_updating: false || args.initial_data_model.is_some(),
             cluster_result_text: "Cluster program status: No Error".to_string(),
             num_points_cloud: point_analyzer.get_initial_points().len(),
-            cluster_information
+            cluster_information,
+            position: point_analyzer.get_initial_lidar_pos()
         }
     }
 }
@@ -246,16 +250,30 @@ impl PointCloudData
 /// `window_title` - the title the created window should have
 pub fn create_window(window_size: (u32, u32), window_tile: String) -> RenderWindow
 {
+    let window_hints = if cfg!(debug_assertions)
+    {
+        vec!
+        [
+            // Only have debug mode if the program as a whole is compiled in debug mode
+            glfw::WindowHint::OpenGlDebugContext(true),
+            glfw::WindowHint::ContextVersion(4, 5),
+            glfw::WindowHint::OpenGlProfile(OpenGlProfileHint::Core)
+        ]
+    }
+    else
+    {
+        vec!
+        [
+            glfw::WindowHint::ContextVersion(4, 5),
+            glfw::WindowHint::OpenGlProfile(OpenGlProfileHint::Core)
+        ]
+    };
+
     let render_window = RenderWindow::new
         (
             window_size,
             window_tile,
-            vec!
-            [
-                glfw::WindowHint::OpenGlDebugContext(true),
-                glfw::WindowHint::ContextVersion(4, 5),
-                glfw::WindowHint::OpenGlProfile(OpenGlProfileHint::Core)
-            ],
+            window_hints,
         );
 
     // These are known to be needed later in the program

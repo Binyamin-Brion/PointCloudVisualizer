@@ -11,6 +11,14 @@ pub struct SunLight
 {
     fbo: FBO,
     look_at_position: TVec3<f32>,
+    current_scroll_direction: ScrollDirection
+}
+
+enum ScrollDirection
+{
+    X,
+    Y,
+    Z
 }
 
 impl SunLight
@@ -36,7 +44,7 @@ impl SunLight
 
         let fbo = FBO::new(window_dimensions, binding_point, camera_type, TextureType::DepthComponent).unwrap();
 
-        SunLight{ fbo, look_at_position: vec3(0.0, 0.0, 0.0) }
+        SunLight{ fbo, look_at_position: vec3(0.0, 0.0, 0.0), current_scroll_direction: ScrollDirection::X }
     }
 
     /// Sets the appropriate uniforms so that the sun's perspective can be rendered
@@ -97,15 +105,18 @@ impl SunLight
     }
 
     /// Get the string representation of the sun's position
-    pub fn to_string_sun_position(&self) -> String
+    pub fn to_string_sun_position(&self, lidar_pos: TVec3<f32>) -> String
     {
-        self.fbo.get_camera().to_string_pos()
+        self.fbo.get_camera().to_string_pos(lidar_pos)
     }
 
     /// Get the string representation of the position the sun is looking at
-    pub fn to_string_lookat_pos(&self) -> String
+    pub fn to_string_lookat_pos(&self, lidar_pos: TVec3<f32>) -> String
     {
-        format!("{:.1}   {:.1}   {:.1}", self.look_at_position.x, self.look_at_position.y, self.look_at_position.z)
+        format!("{:.1}   {:.1}   {:.1}",
+                self.look_at_position.x + lidar_pos.x,
+                self.look_at_position.y + lidar_pos.y,
+                self.look_at_position.z + lidar_pos.z)
     }
 
     /// Move the sun according to key input
@@ -129,6 +140,31 @@ impl SunLight
     /// `render_window` - the structure representing the window being rendered to
     pub fn move_look_at_position(&mut self, render_window: &RenderWindow)
     {
+        for x in render_window.get_scroll_history()
+        {
+            match self.current_scroll_direction
+            {
+                ScrollDirection::X => self.look_at_position.x += *x / 10.0,
+                ScrollDirection::Y => self.look_at_position.y += *x / 10.0,
+                ScrollDirection::Z => self.look_at_position.z += *x / 10.0,
+            }
+        }
+
+        if render_window.get_key_input().iter().find(|x| **x == (Key::Num1, Action::Press)).is_some()
+        {
+            self.current_scroll_direction = ScrollDirection::X;
+        }
+
+        if render_window.get_key_input().iter().find(|x| **x == (Key::Num2, Action::Press)).is_some()
+        {
+            self.current_scroll_direction = ScrollDirection::Y;
+        }
+
+        if render_window.get_key_input().iter().find(|x| **x == (Key::Num3, Action::Press)).is_some()
+        {
+            self.current_scroll_direction = ScrollDirection::Z;
+        }
+
         if render_window.get_key_input().iter().find(|x| **x == (Key::W, Action::Press)).is_some() ||
             render_window.get_key_input().iter().find(|x| **x == (Key::W, Action::Repeat)).is_some()
         {

@@ -79,13 +79,13 @@ impl ViewFBO
 
     /// Buffers the held view information to be rendered (view positions, and for the sun, the direction
     /// of the camera in the sun view
-    pub fn buffer_write_fbo_information(&self, text_renderer: &mut TextRendering)
+    pub fn buffer_write_fbo_information(&self, text_renderer: &mut TextRendering, lidar_pos: TVec3<f32>)
     {
-        text_renderer.buffer_text_for_rendering("RP: ".to_string() + &self.right.get_camera().to_string_pos(), vec2(0.55, 0.15), 30);
-        text_renderer.buffer_text_for_rendering("TP:  " .to_string() + &self.top.get_camera().to_string_pos(), vec2(0.55, 0.1), 30);
+        text_renderer.buffer_text_for_rendering("RP: ".to_string() + &self.right.get_camera().to_string_pos(lidar_pos), vec2(0.475, 0.15), 30);
+        text_renderer.buffer_text_for_rendering("TP:  " .to_string() + &self.top.get_camera().to_string_pos(lidar_pos), vec2(0.475, 0.1), 30);
 
-        text_renderer.buffer_text_for_rendering("SP: ".to_string() + &self.sun.to_string_sun_position(), vec2(0.8, 0.15), 30);
-        text_renderer.buffer_text_for_rendering("SD:  " .to_string() + &self.sun.to_string_lookat_pos(), vec2(0.8, 0.1), 30);
+        text_renderer.buffer_text_for_rendering("SP: ".to_string() + &self.sun.to_string_sun_position(lidar_pos), vec2(0.75, 0.15), 30);
+        text_renderer.buffer_text_for_rendering("SD:  " .to_string() + &self.sun.to_string_lookat_pos(lidar_pos), vec2(0.75, 0.1), 30);
     }
 
     /// Reset the camera movement keys of all the views. All camera movements for the view will stop

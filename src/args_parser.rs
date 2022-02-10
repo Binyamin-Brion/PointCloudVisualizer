@@ -7,6 +7,7 @@ pub struct Args
 {
     pub initial_data_model: Option<String>,
     pub ipc_files: Vec<IPCFiles>,
+    pub display_lidar_pos: bool,
     pub sleep_duration_ms: u64
 }
 
@@ -29,6 +30,7 @@ impl Args
         {
             initial_data_model: None,
             ipc_files: vec![],
+            display_lidar_pos: false,
             sleep_duration_ms: 250
         };
 
@@ -78,6 +80,22 @@ impl Args
                         exit(-1);
                     }
                 }
+        }
+
+        if let Some(use_lidar_pos) = matches.value_of("display_lidar_pos")
+        {
+            // As mentioned in arguments.yml, not sure why clap requires a value for an arg. If a value
+            // is being added, may as well give user an option if -p arg has any effect, even if arg
+            // itself is not required
+            match use_lidar_pos.parse::<u64>()
+            {
+                Ok(i) => args.display_lidar_pos = i != 0,
+                Err(err) =>
+                    {
+                        eprintln!("Invalid number for the display lidar pos option: {}. Error: {}", use_lidar_pos, err);
+                        exit(-1);
+                    }
+            }
         }
 
         if let Some(wait_duration) = matches.value_of("sleep_duration")

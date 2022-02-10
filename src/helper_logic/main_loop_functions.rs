@@ -1,6 +1,6 @@
 use std::time::Instant;
 use glfw::{Action, Key, MouseButton};
-use nalgebra_glm::vec2;
+use nalgebra_glm::{TVec3, vec2, vec3};
 use crate::helper_logic::initialization_functions::RenderData;
 use crate::rendering::scene_renderer::{SceneRenderer, ModelId, UploadInformation};
 use crate::rendering::camera::Camera;
@@ -23,6 +23,8 @@ pub struct TextWriteParam<'a>
     pub cluster_result_text: &'a str,
     pub epsilon: f32,
     pub min_num_points: u32,
+    pub lidar_pos: Option<TVec3<f32>>,
+    pub add_lidar_pos: bool
 }
 
 /// Required parameters to process a new update
@@ -30,6 +32,7 @@ pub struct TextWriteParam<'a>
 pub struct HandleIPCUpdate<'a>
 {
     pub ipc_args: IPCProcessingArgs<'a>,
+    pub lidar_pos: &'a mut Option<TVec3<f32>>,
     pub num_cloud_points: &'a mut usize,
     pub time_since_update: &'a mut Instant,
     pub cluster_result_text: &'a mut String,
@@ -86,11 +89,22 @@ pub fn update_camera_movement(view_selection: &mut ViewSelection, fbos: &mut Vie
     }
 }
 
+/// Reflects the point cloud along the y-axis
 pub fn reflect_point_cloud(render_variables: &mut RenderData)
 {
     if render_variables.render_window.get_key_input().iter().find(|x| **x == (Key::F7, Action::Press)).is_some()
     {
         render_variables.reflect_y_axis();
+    }
+}
+
+/// Toggles adding the lidar to the various camera positions text representations. This does not move
+/// the cameras physically
+pub fn add_lidar_pos(render_variables: &mut RenderData)
+{
+    if render_variables.render_window.get_key_input().iter().find(|x| **x == (Key::Tab, Action::Press)).is_some()
+    {
+        render_variables.add_lidar_pos = !render_variables.add_lidar_pos;
     }
 }
 
@@ -148,6 +162,7 @@ pub fn update_point_cloud(args: HandleIPCUpdate)
                     *args.num_cloud_points = num_points;
                 }
 
+                *args.lidar_pos = i.lidar_pos;
                 *args.cluster_result_text = i.cluster_error_message;
             },
         IPCUpdateResult::Error(err) => *args.cluster_result_text = err,
@@ -267,11 +282,34 @@ pub fn write_scene_info(param: TextWriteParam)
     {
         param.text_renderer.buffer_text_for_rendering("TU: > 10s", vec2(0.025, 0.1), 30);
     }
-    param.text_renderer.buffer_text_for_rendering("MP:  ".to_string() + &param.camera.to_string_pos(), vec2(0.3, 0.15), 30);
-    param.text_renderer.buffer_text_for_rendering("MD: ".to_string() + &param.camera.to_string_direction(), vec2(0.3, 0.1), 30);
+
+    let lidar_pos = match (param.add_lidar_pos, param.lidar_pos)
+    {
+        (true, Some(i)) => i,
+        _ => vec3(0.0, 0.0, 0.0)
+    };
+
+    param.text_renderer.buffer_text_for_rendering("MP:  ".to_string() + &param.camera.to_string_pos(lidar_pos), vec2(0.2, 0.15), 30);
+    param.text_renderer.buffer_text_for_rendering("MD: ".to_string() + &param.camera.to_string_direction(), vec2(0.2, 0.1), 30);
     param.text_renderer.buffer_text_for_rendering(param.cluster_result_text, vec2(0.025, 0.025), 80);
     param.text_renderer.buffer_text_for_rendering("Epsilon: ".to_string() + &format!("{:.2}", param.epsilon), vec2(0.715, 0.025), 15);
     param.text_renderer.buffer_text_for_rendering("Min points: ".to_string() + &param.min_num_points.to_string(), vec2(0.85, 0.025), 15);
-    param.view_fbos.buffer_write_fbo_information(param.text_renderer);
+    param.view_fbos.buffer_write_fbo_information(param.text_renderer, lidar_pos);
+
+    let lidar_pos_text = if let Some(lidar_pos) = param.lidar_pos
+    {
+        let mut string = format!("LP: {:.1}   {:.1}   {:.1}", lidar_pos.x, lidar_pos.y, lidar_pos.z);
+        if param.add_lidar_pos
+        {
+            string += " (Added)";
+        }
+        string
+    }
+    else
+    {
+        "LP: N/A".to_string()
+    };
+    param.text_renderer.buffer_text_for_rendering(lidar_pos_text, vec2(0.025, 0.2), 30);
+
     param.text_renderer.render_buffered_text();
 }

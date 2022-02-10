@@ -258,9 +258,14 @@ impl Camera
     }
 
     /// Get the string representation of the camera position
-    pub fn to_string_pos(&self) -> String
+    ///
+    /// `add_lidar_pos` - the lidar pos to add to the camera position text representation, if any
+    pub fn to_string_pos(&self, add_lidar_pos: TVec3<f32>) -> String
     {
-        format!("{:.1}   {:.1}   {:.1}", self.position.x, self.position.y, self.position.z)
+        format!("{:.1}   {:.1}   {:.1}",
+                self.position.x + add_lidar_pos.x,
+                self.position.y + add_lidar_pos.y,
+                self.position.z + add_lidar_pos.z)
     }
 
     /// Get the string representation of the direction the camera is looking at
