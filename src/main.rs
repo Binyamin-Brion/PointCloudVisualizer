@@ -5,6 +5,7 @@ mod helper_logic;
 mod ipc_logic;
 mod rendering;
 mod view_logic;
+mod view_port_constants;
 mod window;
 
 use std::time::Duration;

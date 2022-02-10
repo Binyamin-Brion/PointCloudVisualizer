@@ -10,6 +10,7 @@ use crate::gl_wrappers::buffer::{Buffer, BufferType};
 use crate::helper_logic::folder_location_functions::{get_shaders_folder, get_text_folder};
 use crate::gl_wrappers::shader_program_creation::{ShaderInitInfo, ShaderProgram, ShaderType};
 use crate::gl_wrappers::vao::VAO;
+use crate::view_port_constants::TEXT_AREA_VIEWPORT_WIDTH;
 
 /// Logic and components required to render text
 pub struct TextRendering
@@ -238,7 +239,7 @@ impl TextRendering
         unsafe
             {
                 gl::Disable(gl::DEPTH_TEST);
-                gl::Viewport(0, 0, (self.window_dimensions.0 as f32 * 0.665 ) as i32, self.window_dimensions.1);
+                gl::Viewport(0, 0, (self.window_dimensions.0 as f32 * TEXT_AREA_VIEWPORT_WIDTH) as i32, self.window_dimensions.1);
                 gl::BindTextureUnit(0, self.texture);
             }
 

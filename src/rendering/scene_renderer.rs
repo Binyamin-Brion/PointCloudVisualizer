@@ -11,6 +11,7 @@ use crate::helper_logic::point_cloud_analyzer::InitialCloudAnalyzer;
 use crate::gl_wrappers::shader_program_creation::{ShaderInitInfo, ShaderProgram, ShaderType};
 use crate::gl_wrappers::vao::VAO;
 use crate::rendering::draw_functions;
+use crate::view_port_constants::{SCENE_VIEWPORT_HEIGHT_OFFSET, SCENE_VIEWPORT_WIDTH};
 
 pub fn default_point_colour() -> TVec3<f32>
 {
@@ -343,12 +344,12 @@ impl SceneRenderer
 
         self.shader_program.write_uint("drawingGrid", 1);
         self.shader_program.write_mat4("projViewMatrix", &outside_param.camera.get_projection_view_matrix());
-        let reset_viewport_x = ((outside_param.window_resolution.0 as f32) * 0.675) as i32;
+        let reset_viewport_x = ((outside_param.window_resolution.0 as f32) * SCENE_VIEWPORT_WIDTH) as i32;
         let reset_viewport_y = outside_param.window_resolution.1 as i32;
 
         unsafe
             {
-                gl::Viewport(0, (outside_param.window_resolution.1 as f32 * 0.25) as i32, reset_viewport_x, reset_viewport_y);
+                gl::Viewport(0, (outside_param.window_resolution.1 as f32 * SCENE_VIEWPORT_HEIGHT_OFFSET) as i32, reset_viewport_x, reset_viewport_y);
 
                 let mut instance_offset: u32 = self.base_number_instances;
                 gl::DrawArraysInstancedBaseInstance(gl::LINES, 2, 2, self.grid.get_num_instances(), instance_offset);

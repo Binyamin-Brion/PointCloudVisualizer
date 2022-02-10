@@ -3,6 +3,7 @@ use nalgebra_glm::{TMat4, TVec3, vec3};
 use crate::rendering::camera::Camera;
 use crate::gl_wrappers::shader_program_creation::ShaderProgram;
 use crate::rendering::view_fbo::ViewFBO;
+use crate::view_port_constants::{SCENE_VIEWPORT_HEIGHT_OFFSET, SCENE_VIEWPORT_WIDTH};
 use crate::view_logic::view_selection::ViewSelection;
 use crate::view_logic::view_transform::ViewTransformation;
 
@@ -85,7 +86,7 @@ pub fn draw_sun_arrow(shader_program: &ShaderProgram, draw_call_info: &DrawCallI
 /// Renders the scene onto the window. Assumes the shadow map has been created
 fn render_scene(shader_program: &ShaderProgram, draw_call_info: &DrawCallInfo, outside_param: OutsideParam)
 {
-    let reset_viewport_x = ((outside_param.window_resolution.0 as f32) * 0.675) as i32;
+    let reset_viewport_x = ((outside_param.window_resolution.0 as f32) * SCENE_VIEWPORT_WIDTH) as i32;
     let reset_viewport_y = outside_param.window_resolution.1 as i32;
 
     let sun = outside_param.view_fbos.get_sun_fbo();
@@ -105,7 +106,7 @@ fn render_scene(shader_program: &ShaderProgram, draw_call_info: &DrawCallInfo, o
             gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
             gl::ClearColor(0.15, 0.15, 0.15, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT | gl::STENCIL_BUFFER_BIT);
-            gl::Viewport(0, ((outside_param.window_resolution.1 as f32 * 0.25)) as i32, reset_viewport_x, reset_viewport_y);
+            gl::Viewport(0, ((outside_param.window_resolution.1 as f32 * SCENE_VIEWPORT_HEIGHT_OFFSET)) as i32, reset_viewport_x, reset_viewport_y);
             gl::DrawElementsInstancedBaseVertexBaseInstance(gl::TRIANGLES, draw_call_info.indice_count, gl::UNSIGNED_INT, draw_call_info.indice_offset, draw_call_info.instance_count, draw_call_info.vertex_offset, draw_call_info.instance_offset);
         }
 
