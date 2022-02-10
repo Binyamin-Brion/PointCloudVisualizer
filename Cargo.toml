@@ -20,3 +20,7 @@ angel_font_file_parser = { path = "../AngelFontFileParser" }
 [dependencies.glfw]
 git = "https://github.com/bjz/glfw-rs.git"
 default-features = false
+
+[profile.release-lto]
+inherits = "release"
+lto = true
